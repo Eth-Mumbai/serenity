@@ -18,7 +18,7 @@ contract SerenityFactory {
         ERC20 token0,
         ERC20 token1,
         string memory protocolName
-    ) {
+    ) public {
         Serenity serenityContract = new Serenity(
             token0,
             token1,
