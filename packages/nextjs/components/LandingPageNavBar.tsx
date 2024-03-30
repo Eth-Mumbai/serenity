@@ -12,7 +12,7 @@ function IconGithub(props: React.SVGProps<SVGSVGElement>) {
 const Navbar: React.FC = () => {
   return (
     <nav className="fixed left-0 top-0 z-50 flex w-full items-center justify-between bg-black bg-opacity-0 p-4">
-      <h5 className="font-alsscrp text-5xl font-bold">serenity</h5>
+      <h5 className="text-white font-alsscrp text-5xl font-bold">serenity</h5>
       <div className="flex gap-4">
         <a href="https://example.com" className="text-white">
           <IconGithub />

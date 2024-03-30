@@ -1,15 +1,19 @@
+
+const {
+  default: flattenColorPalette,
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+} = require("tailwindcss/lib/util/flattenColorPalette");
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}", "./utils/**/*.{js,ts,jsx,tsx}"],
-  plugins: [require("daisyui")],
-  darkTheme: "dark",
-  // DaisyUI theme colors
-  daisyui: {
-    themes: [
+export const content = ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}", "./utils/**/*.{js,ts,jsx,tsx}"];
+export const plugins = [require("daisyui"), addVariablesForColors];
+export const darkTheme = "dark";
+export const daisyui = {
+  themes: [
       {
         light: {
-          primary: "#590059",
-          "primary-content": "#ffffff",
+          primary: "#93BBFB",
+          "primary-content": "#212638",
           secondary: "#DAE8FF",
           "secondary-content": "#212638",
           accent: "#93BBFB",
@@ -42,14 +46,14 @@ module.exports = {
         dark: {
           primary: "#212638",
           "primary-content": "#F9FBFF",
-          secondary: "#ff44c4",
+          secondary: "#323f61",
           "secondary-content": "#F9FBFF",
           accent: "#4969A6",
           "accent-content": "#F9FBFF",
           neutral: "#F9FBFF",
           "neutral-content": "#385183",
           "base-100": "#385183",
-          "base-200": "#740074",
+          "base-200": "#2A3655",
           "base-300": "#212638",
           "base-content": "#F9FBFF",
           info: "#385183",
@@ -72,18 +76,29 @@ module.exports = {
         },
       },
     ],
-  },
-  theme: {
-    extend: {
-      boxShadow: {
-        center: "0 0 12px -2px rgb(0 0 0 / 0.05)",
-      },
-      fontFamily: {
-        alsscrp: ["alsscrp", "sans-serif"],
-      },
-      animation: {
-        "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-      },
+};
+export const theme = {
+  extend: {
+    boxShadow: {
+      center: "0 0 12px -2px rgb(0 0 0 / 0.05)",
+    },
+    fontFamily: {
+      alsscrp: ["alsscrp", "sans-serif"],
+    },
+    animation: {
+      "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
     },
   },
 };
+
+function addVariablesForColors({ addBase, theme }) {
+  
+  let allColors = flattenColorPalette(theme("colors"));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+ 
+  addBase({
+    ":root": newVars,
+  });
+}
