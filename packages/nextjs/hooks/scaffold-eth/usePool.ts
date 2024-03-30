@@ -4,6 +4,7 @@ import { BigintIsh, Currency, Token } from "@pancakeswap/swap-sdk-core";
 import { DEPLOYER_ADDRESSES, FeeAmount, Pool, computePoolAddress } from "@pancakeswap/v3-sdk";
 import { Address } from "viem";
 import { readContract } from "wagmi/actions";
+import scaffoldConfig from "~~/scaffold.config";
 
 export enum PoolState {
   LOADING,
@@ -12,7 +13,7 @@ export enum PoolState {
   INVALID,
 }
 
-async function useMultipleContractSingleData<T>({
+async function useMultipleContractSingleData({
   addresses,
   abi,
   functionName,
@@ -20,19 +21,20 @@ async function useMultipleContractSingleData<T>({
   addresses: (Address | undefined)[];
   abi: any;
   functionName: string;
-}): T {
+}): Promise<any> {
   const result = await Promise.allSettled(
     addresses.map(async addr => {
-      const result = await readContract(config, {
+      const result = await readContract({
         abi: abi,
         address: addr!,
+        args: [],
         functionName: functionName,
       });
       return result;
     }),
   );
 
-  return result.map(e => e.value);
+  return result.map(e => (e.status === "fulfilled" ? e.value : null));
 }
 
 // Classes are expensive to instantiate, so this caches the recently instantiated pools.
@@ -106,7 +108,7 @@ class PoolCache {
 export async function usePools(
   poolKeys: [Currency | undefined | null, Currency | undefined | null, FeeAmount | undefined][],
 ): Promise<[PoolState, Pool | null][]> {
-  const chainId = getChainId(config);
+  const chainId = scaffoldConfig.targetNetworks[0].id;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const poolTokens: ([Token, Token, FeeAmount] | undefined)[] = useMemo(() => {
@@ -123,6 +125,7 @@ export async function usePools(
       return undefined;
     });
   }, [chainId, poolKeys]);
+  console.log("poolTokens", poolTokens);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const poolAddresses: (Address | undefined)[] = useMemo(() => {
@@ -131,18 +134,15 @@ export async function usePools(
 
     return poolTokens.map(value => value && PoolCache.getPoolAddress(v3CoreDeployerAddress, ...value));
   }, [chainId, poolTokens]);
-
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const slot0s: [bigint, number, number, number, number, number, boolean][] = useMultipleContractSingleData<
-    [bigint, number, number, number, number, number, boolean][]
-  >({
+  const slot0s = await useMultipleContractSingleData({
     addresses: poolAddresses,
     abi: v3PoolStateABI,
     functionName: "slot0",
   });
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const liquidities = useMultipleContractSingleData<bigint[]>({
+  const liquidities = await useMultipleContractSingleData({
     addresses: poolAddresses,
     abi: v3PoolStateABI,
     functionName: "liquidity",

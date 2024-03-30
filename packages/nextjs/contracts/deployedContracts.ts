@@ -7,3 +7,405 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {} as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;
+
+export const serenityManager = "0x0d1cb0e2ec2ef8b9219cbcb67fb1f3505f3983e9";
+
+export const serenityABI = [
+  {
+    inputs: [
+      {
+        internalType: "contract ERC20",
+        name: "token0_",
+        type: "address",
+      },
+      {
+        internalType: "contract ERC20",
+        name: "token1_",
+        type: "address",
+      },
+      {
+        internalType: "contract INonfungiblePositionManager",
+        name: "_nonfungiblePositionManager",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "protocolName_",
+        type: "string",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint24",
+        name: "fee",
+        type: "uint24",
+      },
+      {
+        internalType: "int24",
+        name: "tickLower",
+        type: "int24",
+      },
+      {
+        internalType: "int24",
+        name: "tickUpper",
+        type: "int24",
+      },
+      {
+        internalType: "uint256",
+        name: "amount0Desired",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1Desired",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount0Min",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1Min",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "timeToLock",
+        type: "uint256",
+      },
+    ],
+    name: "addNewLiquidity",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    name: "calculateVotingPowerForAt",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "deposits",
+    outputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "uint128",
+        name: "liquidity",
+        type: "uint128",
+      },
+      {
+        internalType: "address",
+        name: "token0",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "token1",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "amount0Desired",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1Desired",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount0Min",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1Min",
+        type: "uint256",
+      },
+    ],
+    name: "increaseLiquidity",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "initialPositionData",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "initialHeight",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "startTime",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "endTime",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "nonfungiblePositionManager",
+    outputs: [
+      {
+        internalType: "contract INonfungiblePositionManager",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
+      },
+    ],
+    name: "onERC721Received",
+    outputs: [
+      {
+        internalType: "bytes4",
+        name: "",
+        type: "bytes4",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "positionTokenIds",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "spikeHistory",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "spikesTimeline",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token0",
+    outputs: [
+      {
+        internalType: "contract ERC20",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token1",
+    outputs: [
+      {
+        internalType: "contract ERC20",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
+export const serenityManagerAbi = [
+  {
+    inputs: [
+      {
+        internalType: "contract INonfungiblePositionManager",
+        name: "nonFungiblePositionManager_",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    inputs: [
+      {
+        internalType: "contract ERC20",
+        name: "token0",
+        type: "address",
+      },
+      {
+        internalType: "contract ERC20",
+        name: "token1",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "protocolName",
+        type: "string",
+      },
+    ],
+    name: "createNewProtocol",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "nonFungiblePositionManager",
+    outputs: [
+      {
+        internalType: "contract INonfungiblePositionManager",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "contract ERC20",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "protocolSerenityContracts",
+    outputs: [
+      {
+        internalType: "contract Serenity",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];

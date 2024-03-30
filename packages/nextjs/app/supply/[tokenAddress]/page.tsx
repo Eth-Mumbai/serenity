@@ -1,19 +1,19 @@
+"use client";
+
 import { useEffect, useState } from "react";
 // import { usePool } from "../hooks/usePools";
 // import { globalState } from "../state";
-import { DaoVault } from "./DaoVault";
 import { BigintIsh, Price, Token } from "@pancakeswap/sdk";
 import { Position, TickMath, nearestUsableTick, tickToPrice } from "@pancakeswap/v3-sdk";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import BigNumber from "bignumber.js";
 import { zeroAddress } from "viem";
-import { useAccount, useBlockNumber, useChainId } from "wagmi";
+import { erc20ABI, useAccount, useBlockNumber, useChainId, useContractRead, useContractWrite } from "wagmi";
 import { Chart } from "~~/components/scaffold-eth/LiquidityChartRangeInput/Chart";
 import { PriceFormats } from "~~/components/scaffold-eth/LiquidityChartRangeInput/types";
-import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { serenityABI, serenityManager, serenityManagerAbi } from "~~/contracts/deployedContracts";
 import { usePool } from "~~/hooks/scaffold-eth/usePool";
-import tryParseCurrencyAmount from "~~/utils/scaffold-eth/common";
-import {
+import tryParseCurrencyAmount, {
   bigNumberToBigInt,
   formatBalance,
   getTokenUri,
@@ -36,25 +36,35 @@ const TICK_SPACINGS: { [amount in FeeAmount]: number } = {
 
 const BN_TEN = new BigNumber(10);
 
-const LiquiditySupply = () => {
+const LiquiditySupply = ({ params }: { params: { slug: string } }) => {
   //   const vaultAddress = useSearchParams();
   //   const pairs = useAtomValue(globalState);
+  const slugAddress = params.slug;
   const pairs = [
     {
-      vaultAddress: "",
-      price: "",
-      lowerPrice: "",
-      upperPrice: "",
-      token0: `0x0000000000000000000000000`,
-      token1: `0x0000000000000000000000000`,
-      isToken0Base: true,
+      price: "1.00",
+      lowerPrice: "0.008",
+      upperPrice: "1.2",
+      token0: `0x3EF066238214054c5D08EFC1e5599fF53dB0818D`,
+      token1: `0x7CB7b966d91cA7dE9FEADFdffe9F37C69C5F2f1B`,
+      isToken0Base: false,
     },
   ];
-  const vaultAddress = "";
-  const currentPair = pairs?.find(e => e?.vaultAddress === vaultAddress);
+
+  const { data: serenityAddress } = useContractRead({
+    address: serenityManager,
+    abi: serenityManagerAbi,
+    functionName: "protocolSerenityContracts",
+    args: [slugAddress],
+  });
+
+  const currentPair = pairs[0];
 
   const chainId = useChainId();
-  const account = useAccount();
+  const { address } = useAccount();
+
+  console.log(address);
+
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
   const currPrice = Number(currentPair ? currentPair.price : "0");
@@ -74,76 +84,57 @@ const LiquiditySupply = () => {
 
   const [independentToken, setIndependentToken] = useState<"baseToken" | "quoteToken">("quoteToken");
 
-  const { data: baseTokenSymbol } = useScaffoldContractRead({
-    contractName: "ERC20",
+  const { data: baseTokenSymbol } = useContractRead({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token0 : currentPair?.token1,
     functionName: "symbol",
   });
 
-  const { data: quoteTokenSymbol } = useScaffoldContractRead({
-    contractName: "ERC20",
+  const { data: quoteTokenSymbol } = useContractRead({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token1 : currentPair?.token0,
     functionName: "symbol",
   });
 
-  const { data: quoteTokenDecimals } = useScaffoldContractRead({
-    contractName: "ERC20",
+  const { data: quoteTokenDecimals } = useContractRead({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token1 : currentPair?.token0,
     functionName: "decimals",
   });
 
-  const { data: baseTokenDecimals } = useScaffoldContractRead({
-    contractName: "ERC20",
+  const { data: baseTokenDecimals } = useContractRead({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token0 : currentPair?.token1,
     functionName: "decimals",
   });
 
-  const { data: quoteTokenBalance, refetch: BalanceOfToken1Refetch } = useScaffoldContractRead({
-    contractName: "ERC20",
+  const { data: quoteTokenBalance, refetch: BalanceOfToken1Refetch } = useContractRead({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token1 : currentPair?.token0,
     functionName: "balanceOf",
-    args: [account.address!],
+    args: [address!],
   });
+  const fee = 500;
 
-  const { data: baseTokenBalance, refetch: BalanceOfToken2Refetch } = useScaffoldContractRead({
-    contractName: "ERC20",
+  const { data: baseTokenBalance, refetch: BalanceOfToken2Refetch } = useContractRead({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token0 : currentPair?.token1,
     functionName: "balanceOf",
-    args: [account.address!],
-  });
-
-  const { data: poolAddress } = useScaffoldContractRead({
-    contractName: "ERC20",
-    abi: DaoVault,
-    address: currentPair?.vaultAddress,
-    functionName: "pool",
-  });
-
-  const { data: fee } = useScaffoldContractRead({
-    contractName: "ERC20",
-    abi: [
-      {
-        inputs: [],
-        name: "fee",
-        outputs: [{ internalType: "uint24", name: "", type: "uint24" }],
-        stateMutability: "view",
-        type: "function",
-      },
-    ],
-    address: poolAddress,
-    functionName: "fee",
+    args: [address!],
   });
 
   const quoteToken: Token = new Token(
     chainId,
-    currentPair ? (currentPair?.isToken0Base ? `0x${currentPair?.token1}` : `0x${currentPair?.token0}`) : zeroAddress,
-    quoteTokenDecimals ? quoteTokenDecimals : 18,
+    //@ts-ignore
+    currentPair ? (currentPair?.isToken0Base ? currentPair?.token1 : currentPair?.token0) : zeroAddress,
+    18,
     quoteTokenSymbol ? quoteTokenSymbol : "",
   );
   const baseToken: Token = new Token(
     chainId,
-    currentPair ? (currentPair?.isToken0Base ? `0x${currentPair?.token0}` : `0x${currentPair?.token1}`) : zeroAddress,
-    baseTokenDecimals ? baseTokenDecimals : 18,
+    //@ts-ignore
+    currentPair ? (currentPair?.isToken0Base ? currentPair?.token0 : currentPair?.token1) : zeroAddress,
+    18,
     baseTokenSymbol ? baseTokenSymbol : "",
   );
   const upperPrice: Price<Token, Token> | undefined = tryParsePrice(quoteToken, baseToken, String(maxPriceSelected));
@@ -304,8 +295,8 @@ const LiquiditySupply = () => {
   }, [blockNumber, BalanceOfToken1Refetch, BalanceOfToken2Refetch]);
 
   return (
-    <div className="w-full flex justify-center items-center mt-6 sm:mt-12 lg:mt-16 mb-12">
-      <div className="mx-4 sm:mx-6 md:mx-10 xl:mx-auto w-[60rem] h-[80rem] sm:h-[70rem] md:h-[40rem] rounded-[2rem] overflow-hidden glassmorphism">
+    <div className=" w-full flex justify-center items-center ">
+      <div className="mx-4 sm:mx-6 md:mx-10 xl:mx-auto w-[60rem] h-[80rem] overflow-scroll sm:h-[70rem] md:h-[40rem] rounded-[2rem] overflow-hidden glassmorphism">
         <div className="text-white font-bold border-b border-gray-700 border-solid h-[5rem] px-4 lg:px-12 flex justify-between items-center text-lg lg:text-2xl tracking-wider">
           <span>Add Liquidity</span>
           <svg
@@ -368,7 +359,7 @@ const LiquiditySupply = () => {
         </div>
       </div>
       <ConfirmTxnModal
-        account={account}
+        account={address}
         blockNumber={blockNumber}
         openModal={openModal}
         setOpenModal={setOpenModal}
@@ -376,12 +367,12 @@ const LiquiditySupply = () => {
         baseTokenAmount={baseTokenAmount}
         lowerTick={lowerTick}
         upperTick={upperTick}
+        serenityAddress={serenityAddress}
         currentPair={currentPair}
         baseTokenSymbol={baseTokenSymbol}
         quoteTokenSymbol={quoteTokenSymbol}
         quoteTokenDecimals={quoteTokenDecimals}
         baseTokenDecimals={baseTokenDecimals}
-        vaultAddress={vaultAddress}
         slippagePercentage={slippagePercentage}
         disableBaseToken={disableBaseToken}
         disableQuoteToken={disableQuoteToken}
@@ -961,7 +952,7 @@ const PriceBoundsAndSubmit = ({
 };
 
 const ConfirmTxnModal = ({
-  account,
+  address,
   blockNumber,
   openModal,
   setOpenModal,
@@ -969,10 +960,10 @@ const ConfirmTxnModal = ({
   baseTokenAmount,
   lowerTick,
   upperTick,
+  serenityAddress,
   currentPair,
   baseTokenSymbol,
   quoteTokenSymbol,
-  vaultAddress,
   quoteTokenDecimals,
   baseTokenDecimals,
   slippagePercentage,
@@ -986,15 +977,11 @@ const ConfirmTxnModal = ({
     : bigNumberToBigInt(
         new BigNumber(baseTokenAmount ?? 0).times(BN_TEN.pow(baseTokenDecimals ? baseTokenDecimals : 18)),
       );
-  const { writeAsync: writeContract } = useScaffoldContractWrite({
-    contractName: "",
+  const { writeAsync: writeContract } = useContractWrite({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token0 : currentPair?.token1,
     functionName: "approve",
-    args: [vaultAddress, baseTokenAmountBigInt],
-    blockConfirmations: 1,
-    onBlockConfirmation: txnReceipt => {
-      console.log("Transaction blockHash", txnReceipt.blockHash);
-    },
+    args: [serenityAddress, baseTokenAmountBigInt],
   });
 
   const quoteTokenAmountBigInt = disableQuoteToken
@@ -1003,15 +990,10 @@ const ConfirmTxnModal = ({
         new BigNumber(quoteTokenAmount ?? 0).times(BN_TEN.pow(quoteTokenDecimals ? quoteTokenDecimals : 18)),
       );
 
-  const { writeAsync: writeContract2 } = useScaffoldContractWrite({
-    contractName: "",
+  const { writeAsync: writeContract2 } = useContractWrite({
     address: currentPair?.isToken0Base ? currentPair?.token1 : currentPair?.token0,
-    args: [vaultAddress, quoteTokenAmountBigInt],
+    args: [serenityAddress, quoteTokenAmountBigInt],
     functionName: "approve",
-    blockConfirmations: 1,
-    onBlockConfirmation: txnReceipt => {
-      console.log("Transaction blockHash", txnReceipt.blockHash);
-    },
   });
   const baseTokenOutAmount = disableBaseToken
     ? 0n
@@ -1029,40 +1011,35 @@ const ConfirmTxnModal = ({
           .times(100 - slippagePercentage)
           .div(100),
       );
-  const { writeAsync: writeContract3 } = useScaffoldContractWrite({
-    contractName: "",
-    abi: DaoVault,
-    address: vaultAddress,
-    functionName: "addLiquidity",
+  const { writeAsync: writeContract3 } = useContractWrite({
+    abi: serenityABI,
+    address: serenityAddress,
+    functionName: "addNewLiquidity",
     args: [
       currentPair?.isToken0Base ? baseTokenAmountBigInt : quoteTokenAmountBigInt,
       currentPair?.isToken0Base ? quoteTokenAmountBigInt : baseTokenAmountBigInt,
       lowerTick < upperTick ? lowerTick : (upperTick as number),
       upperTick > lowerTick ? upperTick : (lowerTick as number),
-      [0n, 0n],
+
       [
         currentPair?.isToken0Base ? baseTokenOutAmount : quoteTokenOutAmount,
         currentPair?.isToken0Base ? quoteTokenOutAmount : baseTokenOutAmount,
       ],
     ],
-    blockConfirmations: 1,
-    onBlockConfirmation: txnReceipt => {
-      console.log("Transaction blockHash", txnReceipt.blockHash);
-    },
   });
 
-  const { data: quoteTokenAllowance, refetch: RefetchQuoteTokenAllowance } = useScaffoldContractRead({
-    contractName: "",
+  const { data: quoteTokenAllowance, refetch: RefetchQuoteTokenAllowance } = useContractRead({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token1 : currentPair?.token0,
     functionName: "allowance",
-    args: [account.address!, vaultAddress],
+    args: [address!, serenityAddress],
   });
 
-  const { data: baseTokenAllowance, refetch: RefetchBaseTokenAllowance } = useScaffoldContractRead({
-    contractName: "",
+  const { data: baseTokenAllowance, refetch: RefetchBaseTokenAllowance } = useContractRead({
+    abi: erc20ABI,
     address: currentPair?.isToken0Base ? currentPair?.token0 : currentPair?.token1,
     functionName: "allowance",
-    args: [account.address!, vaultAddress],
+    args: [address!, serenityAddress],
   });
 
   useEffect(() => {
@@ -1078,7 +1055,7 @@ const ConfirmTxnModal = ({
 
   return (
     <div className={`${!openModal && "hidden"} fixed bg-black/70 inset-0`}>
-      <div className="fixed  h-[16rem] w-[20rem] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl modalBG p-5 py-10">
+      <div className="  h-[16rem] w-[20rem] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl modalBG p-5 py-10">
         <svg
           onClick={() => {
             setOpenModal(false);

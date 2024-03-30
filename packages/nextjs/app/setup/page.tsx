@@ -4,6 +4,8 @@ import { useState } from "react";
 import Protocol from "./firstStep";
 import Token0 from "./secondStep";
 import Token1 from "./thirdStep";
+import { writeContract } from "wagmi/actions";
+import { serenityManager, serenityManagerAbi } from "~~/contracts/deployedContracts";
 
 const MainForm = () => {
   const [data, setData] = useState({
@@ -12,6 +14,15 @@ const MainForm = () => {
     token0Address: "",
     token1Address: "",
   });
+
+  const onSubmit = async () => {
+    await writeContract({
+      address: serenityManager,
+      abi: serenityManagerAbi,
+      functionName: "createNewProtocol",
+      args: [data.token0Address, data.token1Address, data.protocolName],
+    });
+  };
 
   const handleChange = (event: any) => {
     console.log(data);
@@ -69,7 +80,7 @@ const MainForm = () => {
             Next
           </button>
           {activeTab === formElements.length - 1 ? (
-            <button className="bg-[#19c5e2] px-10 py-2 rounded-xl  text-white" onClick={() => console.log(data)}>
+            <button className="bg-[#19c5e2] px-10 py-2 rounded-xl  text-white" onClick={async () => await onSubmit()}>
               Submit
             </button>
           ) : null}

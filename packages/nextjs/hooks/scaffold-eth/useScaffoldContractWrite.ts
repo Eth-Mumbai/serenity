@@ -39,8 +39,8 @@ export const useScaffoldContractWrite = <
 
   const wagmiContractWrite = useContractWrite({
     chainId: targetNetwork.id,
-    address: deployedContractData?.address,
-    abi: deployedContractData?.abi as Abi,
+    address: deployedContractData?.address || writeConfig.address,
+    abi: (deployedContractData?.abi as Abi) || writeConfig.abi,
     functionName: functionName as any,
     args: args as unknown[],
     value: value,
