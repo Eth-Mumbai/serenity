@@ -23,17 +23,20 @@ import "@uniswap/v3-periphery/contracts/base/LiquidityManagement.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
 
 contract Serenity is IERC721Receiver {
-    mapping(address => mapping(uint256 => uint256)) spikesTimeline; // address => timestamp => spike
-    mapping(address => uint256[]) spikeHistory; // address => timestamps[]
+    mapping(address => mapping(uint256 => uint256)) public spikesTimeline; // address => timestamp => spike
+    mapping(address => uint256[]) public spikeHistory; // address => timestamps[]
+
+    mapping(address => uint256) public positionTokenIds; // address => PositionNFT id
 
     struct InitialPositionStruct {
         uint256 initialHeight;
         uint256 endTime;
     }
-    mapping(address => InitialPositionStruct) initialPositionData; // address => InitialPositionStruct ( we can recreate position data at any time w/ initialPositionStruct and spikesTimeline)
 
-    ERC20 token0;
-    ERC20 token1;
+    mapping(address => InitialPositionStruct) public initialPositionData; // address => InitialPositionStruct ( we can recreate position data at any time w/ initialPositionStruct and spikesTimeline)
+
+    ERC20 public token0;
+    ERC20 public token1;
 
     INonfungiblePositionManager public immutable nonfungiblePositionManager;
 
@@ -145,20 +148,124 @@ contract Serenity is IERC721Receiver {
         spikeHistory[msg.sender].push(block.timestamp);
     }
 
-    function increaseLiquidity() public {
-        //add a spike to height here at this particular timestamp. spike height depends on amount of liq added
-        // uint256 newSpike = calculateTotalVotingPowerAt(
-        //     msg.sender,
-        //     block.timestamp
-        // ) + uint256(liquidity);
-        // spikesTimeline[msg.sender][block.timestamp] = newSpike;
-        // spikeHistory[msg.sender].push(block.timestamp);
+    function increaseLiquidity(
+        uint256 amount0Desired,
+        uint256 amount1Desired,
+        uint256 amount0Min,
+        uint256 amount1Min
+    ) public {
+        //get tokens from user
+        TransferHelper.safeTransferFrom(
+            address(token0),
+            msg.sender,
+            address(this),
+            amount0Desired
+        );
+        TransferHelper.safeTransferFrom(
+            address(token1),
+            msg.sender,
+            address(this),
+            amount1Desired
+        );
+
+        //approve position manager for tokens
+        TransferHelper.safeApprove(
+            address(token0),
+            address(nonfungiblePositionManager),
+            amount0Desired
+        );
+        TransferHelper.safeApprove(
+            address(token1),
+            address(nonfungiblePositionManager),
+            amount1Desired
+        );
+
+        uint256 tokenId = positionTokenIds[msg.sender];
+
+        INonfungiblePositionManager.IncreaseLiquidityParams
+            memory params = INonfungiblePositionManager
+                .IncreaseLiquidityParams({
+                    tokenId: tokenId,
+                    amount0Desired: amount0Desired,
+                    amount1Desired: amount1Desired,
+                    amount0Min: amount0Min,
+                    amount1Min: amount1Min,
+                    deadline: block.timestamp
+                });
+
+        (
+            uint128 liquidity,
+            uint256 amount0,
+            uint256 amount1
+        ) = nonfungiblePositionManager.increaseLiquidity(params);
+
+        uint256 newSpike = calculateVotingPowerForAt(
+            msg.sender,
+            block.timestamp
+        ) + uint256(liquidity);
+
+        spikesTimeline[msg.sender][block.timestamp] = newSpike;
+        spikeHistory[msg.sender].push(block.timestamp);
+
+        if (amount0 < amount0Desired) {
+            TransferHelper.safeApprove(
+                address(token0),
+                address(nonfungiblePositionManager),
+                0
+            );
+            uint256 refund0 = amount0Desired - amount0;
+            TransferHelper.safeTransfer(address(token0), msg.sender, refund0);
+        }
+
+        if (amount1 < amount1Desired) {
+            TransferHelper.safeApprove(
+                address(token1),
+                address(nonfungiblePositionManager),
+                0
+            );
+            uint256 refund1 = amount1Desired - amount1;
+            TransferHelper.safeTransfer(address(token1), msg.sender, refund1);
+        }
     }
 
     function calculateVotingPowerForAt(
         address user,
         uint256 timestamp
-    ) public returns (uint256) {}
+    ) public returns (uint256) {
+        uint256[] memory historyArray = spikeHistory[msg.sender];
+        uint256 lastSpikeTimeStamp = 0;
+
+        if (historyArray.length == 0) {
+            return 0;
+        }
+
+        if (historyArray.length == 1) {
+            lastSpikeTimeStamp = historyArray[0];
+        } else {
+            for (uint i; i < historyArray.length; i++) {
+                if (i == historyArray.length - 1) {
+                    lastSpikeTimeStamp = historyArray[i];
+                    break;
+                }
+                if (
+                    historyArray[i] <= timestamp &&
+                    historyArray[i + 1] > timestamp
+                ) {
+                    lastSpikeTimeStamp = historyArray[i];
+                    break;
+                }
+            }
+        }
+
+        uint256 endTime = initialPositionData[msg.sender].endTime;
+        uint256 spikeHeight = spikesTimeline[msg.sender][lastSpikeTimeStamp];
+
+        uint256 tanTheta = spikeHeight / (endTime - block.timestamp);
+
+        uint256 spikeHeightCalculated = tanTheta * (endTime - timestamp);
+
+        return spikeHeightCalculated;
+    }
 
     // function collectFeeForPosition() public {
     //     //collect Fee
