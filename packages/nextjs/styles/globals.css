@@ -2,6 +2,11 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@font-face { 
+    font-family: "alsscrp"; 
+    src: url("../public/alsscrp.ttf"); 
+} 
+
 :root,
 [data-theme] {
   background: oklch(var(--b2));

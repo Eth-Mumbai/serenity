@@ -1,11 +1,15 @@
+
+const {
+  default: flattenColorPalette,
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+} = require("tailwindcss/lib/util/flattenColorPalette");
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}", "./utils/**/*.{js,ts,jsx,tsx}"],
-  plugins: [require("daisyui")],
-  darkTheme: "dark",
-  // DaisyUI theme colors
-  daisyui: {
-    themes: [
+export const content = ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}", "./utils/**/*.{js,ts,jsx,tsx}"];
+export const plugins = [require("daisyui"), addVariablesForColors];
+export const darkTheme = "dark";
+export const daisyui = {
+  themes: [
       {
         light: {
           primary: "#93BBFB",
@@ -72,15 +76,29 @@ module.exports = {
         },
       },
     ],
-  },
-  theme: {
-    extend: {
-      boxShadow: {
-        center: "0 0 12px -2px rgb(0 0 0 / 0.05)",
-      },
-      animation: {
-        "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-      },
+};
+export const theme = {
+  extend: {
+    boxShadow: {
+      center: "0 0 12px -2px rgb(0 0 0 / 0.05)",
+    },
+    fontFamily: {
+      alsscrp: ["alsscrp", "sans-serif"],
+    },
+    animation: {
+      "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
     },
   },
 };
+
+function addVariablesForColors({ addBase, theme }) {
+  
+  let allColors = flattenColorPalette(theme("colors"));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+ 
+  addBase({
+    ":root": newVars,
+  });
+}
