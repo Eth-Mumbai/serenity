@@ -23,6 +23,7 @@ import "@uniswap/v3-periphery/contracts/base/LiquidityManagement.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
 
 contract Serenity is IERC721Receiver {
+    string protocolName;
     mapping(address => mapping(uint256 => uint256)) public spikesTimeline; // address => timestamp => spike
     mapping(address => uint256[]) public spikeHistory; // address => timestamps[]
 
@@ -53,11 +54,13 @@ contract Serenity is IERC721Receiver {
     constructor(
         ERC20 token0_,
         ERC20 token1_,
-        INonfungiblePositionManager _nonfungiblePositionManager
+        INonfungiblePositionManager _nonfungiblePositionManager,
+        string memory protocolName_
     ) {
         token0 = token0_;
         token1 = token1_;
         nonfungiblePositionManager = _nonfungiblePositionManager;
+        protocolName = protocolName_;
     }
 
     function addNewLiquidity(
