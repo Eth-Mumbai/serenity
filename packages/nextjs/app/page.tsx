@@ -5,6 +5,7 @@ import type { NextPage } from "next";
 import { Tranquiluxe } from "uvcanvas";
 
 const Home: NextPage = () => {
+  const router = useRouter();
   return (
     <>
       <div className="w-full h-full relative h-screen">
