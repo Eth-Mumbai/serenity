@@ -30,6 +30,7 @@ contract Serenity is IERC721Receiver {
 
     struct InitialPositionStruct {
         uint256 initialHeight;
+        uint256 startTime;
         uint256 endTime;
     }
 
@@ -117,6 +118,7 @@ contract Serenity is IERC721Receiver {
             uint256 amount1
         ) = nonfungiblePositionManager.mint(params);
 
+        positionTokenIds[msg.sender] = tokenId;
         _createDeposit(msg.sender, tokenId);
 
         if (amount0 < amount0Desired) {
@@ -141,7 +143,8 @@ contract Serenity is IERC721Receiver {
 
         initialPositionData[msg.sender] = InitialPositionStruct({
             initialHeight: uint256(liquidity),
-            endTime: block.timestamp + timeToLock
+            endTime: block.timestamp + timeToLock,
+            startTime: block.timestamp
         });
 
         spikesTimeline[msg.sender][block.timestamp] = uint256(liquidity);
@@ -231,8 +234,31 @@ contract Serenity is IERC721Receiver {
     function calculateVotingPowerForAt(
         address user,
         uint256 timestamp
-    ) public returns (uint256) {
-        uint256[] memory historyArray = spikeHistory[msg.sender];
+    ) public view returns (uint256) {
+        uint256 lastSpikeTimeStamp = calcLastSpikeTimeStamp(user, timestamp);
+
+        if (
+            timestamp < initialPositionData[user].startTime ||
+            timestamp > initialPositionData[user].endTime
+        ) {
+            return 0;
+        }
+
+        uint256 endTime = initialPositionData[user].endTime;
+        uint256 spikeHeight = spikesTimeline[user][lastSpikeTimeStamp];
+
+        uint256 tanTheta = spikeHeight / (endTime - block.timestamp);
+
+        uint256 spikeHeightCalculated = tanTheta * (endTime - timestamp);
+
+        return spikeHeightCalculated;
+    }
+
+    function calcLastSpikeTimeStamp(
+        address user,
+        uint256 timestamp
+    ) internal view returns (uint256 lastSpikeTimeStamp) {
+        uint256[] memory historyArray = spikeHistory[user]; //here
         uint256 lastSpikeTimeStamp = 0;
 
         if (historyArray.length == 0) {
@@ -241,6 +267,7 @@ contract Serenity is IERC721Receiver {
 
         if (historyArray.length == 1) {
             lastSpikeTimeStamp = historyArray[0];
+            return lastSpikeTimeStamp;
         } else {
             for (uint i; i < historyArray.length; i++) {
                 if (i == historyArray.length - 1) {
@@ -256,18 +283,13 @@ contract Serenity is IERC721Receiver {
                 }
             }
         }
-
-        uint256 endTime = initialPositionData[msg.sender].endTime;
-        uint256 spikeHeight = spikesTimeline[msg.sender][lastSpikeTimeStamp];
-
-        uint256 tanTheta = spikeHeight / (endTime - block.timestamp);
-
-        uint256 spikeHeightCalculated = tanTheta * (endTime - timestamp);
-
-        return spikeHeightCalculated;
     }
 
     // function collectFeeForPosition() public {
+    //     //collect Fee
+    // }
+
+    // function removePosition() public {
     //     //collect Fee
     // }
 
