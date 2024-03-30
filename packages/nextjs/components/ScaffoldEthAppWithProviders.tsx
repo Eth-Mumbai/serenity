@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import Navbar from "./LandingPageNavBar";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
@@ -17,6 +19,7 @@ import { appChains } from "~~/services/web3/wagmiConnectors";
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   const price = useNativeCurrencyPrice();
   const setNativeCurrencyPrice = useGlobalState(state => state.setNativeCurrencyPrice);
+  const pathName = usePathname();
 
   useEffect(() => {
     if (price > 0) {
@@ -27,9 +30,10 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div className="flex flex-col min-h-screen">
-        <Header />
+        {pathName === "/" ? <Navbar /> : <Header />}
+
         <main className="relative flex flex-col flex-1">{children}</main>
-        <Footer />
+        {pathName === "/" ? null : <Footer />}
       </div>
       <Toaster />
     </>

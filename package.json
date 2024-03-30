@@ -42,5 +42,12 @@
     "next": "~14.0.4",
     "vercel": "~32.4.1"
   },
-  "packageManager": "yarn@3.2.3"
+  "packageManager": "yarn@3.2.3",
+  "dependencies": {
+    "@tabler/icons-react": "^3.1.0",
+    "clsx": "^2.1.0",
+    "framer-motion": "^11.0.24",
+    "tailwind-merge": "^2.2.2",
+    "uvcanvas": "^0.2.1"
+  }
 }
