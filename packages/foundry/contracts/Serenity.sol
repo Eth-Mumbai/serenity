@@ -32,9 +32,6 @@ contract Serenity is IERC721Receiver {
     }
     mapping(address => InitialPositionStruct) initialPositionData; // address => InitialPositionStruct ( we can recreate position data at any time w/ initialPositionStruct and spikesTimeline)
 
-    mapping(uint256 => uint256) totalSpikeTimeline; // timestamp => totalSpike
-    uint256[] totalSpike;
-
     ERC20 token0;
     ERC20 token1;
 
@@ -59,7 +56,7 @@ contract Serenity is IERC721Receiver {
         nonfungiblePositionManager = _nonfungiblePositionManager;
     }
 
-    function addLiquidity(
+    function addNewLiquidity(
         uint24 fee,
         int24 tickLower,
         int24 tickUpper,
@@ -143,26 +140,25 @@ contract Serenity is IERC721Receiver {
             initialHeight: uint256(liquidity),
             endTime: block.timestamp + timeToLock
         });
+
+        spikesTimeline[msg.sender][block.timestamp] = uint256(liquidity);
+        spikeHistory[msg.sender].push(block.timestamp);
+    }
+
+    function increaseLiquidity() public {
+        //add a spike to height here at this particular timestamp. spike height depends on amount of liq added
+        // uint256 newSpike = calculateTotalVotingPowerAt(
+        //     msg.sender,
+        //     block.timestamp
+        // ) + uint256(liquidity);
+        // spikesTimeline[msg.sender][block.timestamp] = newSpike;
+        // spikeHistory[msg.sender].push(block.timestamp);
     }
 
     function calculateVotingPowerForAt(
         address user,
         uint256 timestamp
-    ) public returns (uint256) {
-        uint256 newSpike = calculateTotalVotingPowerAt(
-            msg.sender,
-            block.timestamp
-        ) + uint256(liquidity);
-
-        spikesTimeline[msg.sender][block.timestamp] = newSpike;
-        spikeHistory[msg.sender].push(block.timestamp);
-    }
-
-    function calculateTotalVotingPowerAt() public returns (uint256) {}
-
-    // function increaseLiquidity() public {
-    //     //add a spike to height here at this particular timestamp. spike height depends on amount of liq added
-    // }
+    ) public returns (uint256) {}
 
     // function collectFeeForPosition() public {
     //     //collect Fee
