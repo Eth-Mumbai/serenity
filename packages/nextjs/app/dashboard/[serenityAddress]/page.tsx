@@ -18,19 +18,33 @@ export default function BentoGridDemo({ params }: { params: { slug: string } }) 
     {
       title: "The Dawn of Innovation",
       description: "Explore the birth of groundbreaking ideas and inventions.",
-      header: <Skeleton />,
+      header: (
+        <div className="flex justify-center items-center h-full">
+          <div>
+            Protocol Status: <span className="text-green-600">Active</span>
+          </div>
+        </div>
+      ),
       icon: <IconClipboardCopy className="h-4 w-4 text-neutral-500" />,
     },
     {
       title: "The Digital Revolution",
       description: "Dive into the transformative power of technology.",
-      header: <Skeleton />,
+      header: (
+        <div className="flex justify-center items-center h-full">
+          <div>Protocol Liquidity: $30</div>
+        </div>
+      ),
       icon: <IconFileBroken className="h-4 w-4 text-neutral-500" />,
     },
     {
       title: "The Art of Design",
       description: "Discover the beauty of thoughtful and functional design.",
-      header: <Skeleton />,
+      header: (
+        <div className="flex justify-center items-center h-full">
+          <div>Fees Earned: $2</div>
+        </div>
+      ),
       icon: <IconSignature className="h-4 w-4 text-neutral-500" />,
     },
     {
@@ -42,7 +56,11 @@ export default function BentoGridDemo({ params }: { params: { slug: string } }) 
     {
       title: "The Pursuit of Knowledge",
       description: "Join the quest for understanding and enlightenment.",
-      header: <Skeleton />,
+      header: (
+        <div className="flex justify-center items-center h-full">
+          <div>Voting Power: 230k veMTK</div>
+        </div>
+      ),
       icon: <IconArrowWaveRightUp className="h-4 w-4 text-neutral-500" />,
     },
   ];

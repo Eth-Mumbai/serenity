@@ -293,7 +293,7 @@ contract Serenity is IERC721Receiver {
     // }
 
     // function removePosition() public {
-    //     //collect Fee
+    //     //remove Position
     // }
 
     function _createDeposit(address owner, uint256 tokenId) internal {

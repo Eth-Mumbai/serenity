@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col justify-center bg-slate-900">
-      <div className="z-40 h-[700px] overflow-scroll">{children}</div>
+      <div className="z-40 h-[700px] overflow-hidden">{children}</div>
 
       <BackgroundBeams />
     </div>
