@@ -1,9 +1,11 @@
-# 🏗 Scaffold-ETH 2
+#  Serenity
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
+## Deployed Contracts
+Serenity Factory: https://sepolia.etherscan.io/address/0x7a998cf172a2f37b1a2e613f6f6a06edbd62037b <br/>
+Serenity for a particular token pair: https://sepolia.etherscan.io/address/0x84a8ee07d02580bc000d3beb1a4384555b8b77f9
+
+#  Scaffold-ETH
+
 
 🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
 
