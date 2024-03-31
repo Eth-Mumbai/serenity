@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Protocol from "./firstStep";
 import ENS from "./fourthStep";
 import Token0 from "./secondStep";
@@ -20,6 +21,7 @@ const MainForm = () => {
     token0Address: "",
     token1Address: "",
   });
+  const router = useRouter();
 
   const onSubmit = async () => {
     if (typeof window === "undefined") return;
@@ -135,6 +137,8 @@ const MainForm = () => {
       functionName: "createNewProtocol",
       args: [data.token0Address, data.token1Address, data.protocolName],
     });
+
+    router.push(`/dashboard/${serenityAddress}`);
   };
 
   const handleChange = (event: any) => {

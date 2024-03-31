@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Graph from "./graph";
 import {
   IconArrowWaveRightUp,
@@ -11,18 +12,16 @@ import {
 import { BentoGrid, BentoGridItem } from "~~/components/bentoGrid";
 
 export default function BentoGridDemo({ params }: { params: { slug: string } }) {
-  const Skeleton = () => (
-    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100"></div>
-  );
+  const router = useRouter();
+
   const items = [
     {
       title: "The Dawn of Innovation",
       description: "Explore the birth of groundbreaking ideas and inventions.",
       header: (
-        <div className="flex justify-center items-center h-full">
-          <div>
-            Protocol Status: <span className="text-green-600">Active</span>
-          </div>
+        <div className="flex flex-col justify-center content-center items-center h-full">
+          <h1 className="text-2xl">Protocol Status</h1>
+          <span className="text-green-600 text-4xl">Active</span>
         </div>
       ),
       icon: <IconClipboardCopy className="h-4 w-4 text-neutral-500" />,
@@ -31,8 +30,9 @@ export default function BentoGridDemo({ params }: { params: { slug: string } }) 
       title: "The Digital Revolution",
       description: "Dive into the transformative power of technology.",
       header: (
-        <div className="flex justify-center items-center h-full">
-          <div>Protocol Liquidity: $30</div>
+        <div className="flex flex-col justify-center content-center items-center h-full">
+          <h1 className="text-2xl">Protocol Liquidity</h1>
+          <span className="text-4xl">$30</span>
         </div>
       ),
       icon: <IconFileBroken className="h-4 w-4 text-neutral-500" />,
@@ -41,8 +41,13 @@ export default function BentoGridDemo({ params }: { params: { slug: string } }) 
       title: "The Art of Design",
       description: "Discover the beauty of thoughtful and functional design.",
       header: (
-        <div className="flex justify-center items-center h-full">
-          <div>Fees Earned: $2</div>
+        <div
+          onClick={() => router.push("https://testnet.snapshot.org/#/nightfury.eth/create")}
+          className="flex justify-center items-center h-full ml-10"
+        >
+          <div>
+            <h1 className="text-2xl">Create a new proposal →</h1>
+          </div>
         </div>
       ),
       icon: <IconSignature className="h-4 w-4 text-neutral-500" />,
@@ -57,8 +62,9 @@ export default function BentoGridDemo({ params }: { params: { slug: string } }) 
       title: "The Pursuit of Knowledge",
       description: "Join the quest for understanding and enlightenment.",
       header: (
-        <div className="flex justify-center items-center h-full">
-          <div>Voting Power: 230k veMTK</div>
+        <div className="flex flex-col justify-center content-center items-center h-full">
+          <h1 className="text-2xl">Fees Earned</h1>
+          <span className="text-4xl">$2</span>
         </div>
       ),
       icon: <IconArrowWaveRightUp className="h-4 w-4 text-neutral-500" />,
