@@ -11,9 +11,9 @@ const Home: NextPage = () => {
       <div className="w-full h-full relative h-screen">
         <div className="absolute flex h-full w-full flex-col items-center justify-center">
           <h1 className="text-center text-4xl font-bold text-white">
-            Power hyper <span className="text-white font-alsscrp text-7xl font-bold">governance</span> strategies,{" "}
-            <br />
-            right to social feeds of your users
+            Power hyper <span className="text-white font-alsscrp text-7xl font-bold">governance & liquidity</span>{" "}
+            strategies, <br />
+            for any protocol in a couple lines of code
           </h1>
           <br />
 
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
             }}
             type="button"
           >
-            Go to Dapp
+            Start a strategy
           </button>
         </div>
         <Tranquiluxe />
