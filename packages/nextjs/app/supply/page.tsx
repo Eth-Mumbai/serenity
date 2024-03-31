@@ -3,17 +3,36 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { readContract, writeContract } from "wagmi/actions";
+import { serenityABI, serenityManager, serenityManagerAbi } from "~~/contracts/deployedContracts";
 
 const page = () => {
-  const [protocolTokenAddress, setProtocolTokenAddress] = useState("0x");
   const [serenityContractAddress, setSerenityContractAddress] = useState("0x");
+  const [protocolTokenAddress, setProtocolTokenAddress] = useState("0x");
+  const [fee, setFee] = useState("0x");
+  const [tickLower, setTickLower] = useState(-10);
+  const [tickUpper, setTickUpper] = useState(10);
+  const [token1Amount, setToken1Amount] = useState(10);
+  const [token2Amount, setToken2Amount] = useState(10);
+  const [lockingPeriod, setLockingPeriod] = useState(2000);
+
+  const readSerenityAddress = async () => {
+    const result = await readContract({
+      abi: serenityABI,
+      address: serenityManagerAbi!,
+      args: ["ivide token address"],
+      functionName: "protocolSerenityContracts",
+    });
+    return result;
+
+    setSerenityContractAddress(result);
+  };
 
   const onSubmit = async () => {
     await writeContract({
-      address: serenityManager,
-      abi: serenityManagerAbi,
-      functionName: "createNewProtocol",
-      args: [data.token0Address, data.token1Address, data.protocolName],
+      address: serenityContractAddress,
+      abi: serenityABI,
+      functionName: "addNewLiquidity",
+      args: ["ivide ellam input fields"],
     });
   };
 
@@ -71,6 +90,10 @@ const page = () => {
             </svg>
             {/* label-icon */}
             <input
+              value={protocolTokenAddress}
+              onChange={e => {
+                setProtocolTokenAddress(e.target.value);
+              }}
               className="form-input 
           
           block w-full rounded-lg leading-none focus:outline-none placeholder-white
@@ -104,6 +127,10 @@ const page = () => {
             </svg>
             {/* label-icon */}
             <input
+              value={fee}
+              onChange={e => {
+                setFee(e.target.value);
+              }}
               className="form-input 
           
           block w-full rounded-lg leading-none focus:outline-none placeholder-white
@@ -137,6 +164,10 @@ const page = () => {
             </svg>
             {/* label-icon */}
             <input
+              value={tickLower}
+              onChange={e => {
+                setTickLower(e.target.value);
+              }}
               className="form-input 
           
           block w-full rounded-lg leading-none focus:outline-none placeholder-white
@@ -170,6 +201,10 @@ const page = () => {
             </svg>
             {/* label-icon */}
             <input
+              value={tickUpper}
+              onChange={e => {
+                setTickUpper(e.target.value);
+              }}
               className="form-input 
           
           block w-full rounded-lg leading-none focus:outline-none placeholder-white
@@ -203,6 +238,10 @@ const page = () => {
             </svg>
             {/* label-icon */}
             <input
+              value={token1Amount}
+              onChange={e => {
+                setToken1Amount(e.target.value);
+              }}
               className="form-input 
           
           block w-full rounded-lg leading-none focus:outline-none placeholder-white
@@ -236,6 +275,10 @@ const page = () => {
             </svg>
             {/* label-icon */}
             <input
+              value={token2Amount}
+              onChange={e => {
+                setToken2Amount(e.target.value);
+              }}
               className="form-input 
           
           block w-full rounded-lg leading-none focus:outline-none placeholder-white
@@ -269,6 +312,10 @@ const page = () => {
             </svg>
             {/* label-icon */}
             <input
+              value={lockingPeriod}
+              onChange={e => {
+                setLockingPeriod(e.target.value);
+              }}
               className="form-input 
           
           block w-full rounded-lg leading-none focus:outline-none placeholder-white
@@ -283,7 +330,14 @@ const page = () => {
             />
           </label>
         </form>
-        <button className={`px-10 ml-auto py-2 rounded-xl bg-slate-800 text-white`}>Add Liquidity</button>
+        <button
+          onClick={() => {
+            onSubmit();
+          }}
+          className={`px-10 ml-auto py-2 rounded-xl bg-slate-800 text-white`}
+        >
+          Add Liquidity
+        </button>
       </motion.div>
     </div>
   );
